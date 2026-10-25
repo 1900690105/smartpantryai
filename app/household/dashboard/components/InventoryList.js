@@ -98,7 +98,7 @@ export default function InventoryList({ initialBatches }) {
     setQuantity(String(batch.quantity));
     setError("");
   }
-
+  //solved
   return (
     <div className="space-y-3">
       {batches.map((batch) => (
