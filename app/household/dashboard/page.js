@@ -15,6 +15,7 @@ import ProductLookup from "@/app/dashboard/product-lookup";
 import { daysUntil, formatDate } from "@/lib/utils";
 import MealPlanner from "../meal-planner";
 import DonationAlertPopup from "./components/DonationAlertPopup";
+import InventoryList from "./components/InventoryList";
 
 export const dynamic = "force-dynamic";
 const Card = ({ title, icon: Icon, children }) => (
@@ -115,44 +116,16 @@ export default async function HouseholdDashboard() {
           </div>
           <div className="space-y-6">
             <Card title="Your inventory" icon={Boxes}>
-              {batches.length ? (
-                <div className="space-y-3">
-                  {batches.map((b) => (
-                    <article
-                      key={b.id}
-                      className="rounded-xl border border-slate-100 p-4"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h3 className="font-bold">{b.product_name}</h3>
-                          <p className="mt-1 text-sm text-slate-500">
-                            {b.quantity} {b.unit}
-                            {b.expiry_date
-                              ? ` · Best before ${formatDate(b.expiry_date)}`
-                              : " · No date recorded"}
-                          </p>
-                        </div>
-                        {b.expiry_date &&
-                        daysUntil(b.expiry_date) >= 0 &&
-                        daysUntil(b.expiry_date) <= 3 ? (
-                          <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-bold text-amber-900">
-                            Use soon
-                          </span>
-                        ) : null}
-                      </div>
-                      <Link
-                        className="mt-3 inline-flex text-sm font-bold text-leaf hover:underline"
-                        href={`/dashboard#inventory`}
-                      >
-                        Manage inventory
-                      </Link>
-                    </article>
-                  ))}
-                </div>
+              {batches.length > 0 ? (
+                <InventoryList initialBatches={batches} />
               ) : (
-                <Empty text="Your pantry is empty. Add your first grocery above." />
+                <Empty
+                  title="No inventory yet"
+                  description="Add grocery items to start tracking your food."
+                />
               )}
             </Card>
+
             <Card title="Recent activity" icon={ListChecks}>
               {(eventsRes.data || []).length ? (
                 <div className="space-y-3">
