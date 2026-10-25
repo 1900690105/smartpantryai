@@ -207,48 +207,12 @@ export default async function OrganizationDashboard() {
                         <p className="mt-3 text-xs text-amber-800">
                           Organization verification is required.
                         </p>
-                      ) : alreadyRequested ? (
-                        <p className="mt-3 text-sm font-semibold text-emerald-700">
-                          You have already requested this donation.
-                        </p>
                       ) : (
-                        <form action={approveDonationRequest} className="mt-3">
-                          <input
-                            type="hidden"
-                            name="offer_id"
-                            value={offer.id}
-                          />
-
-                          <label
-                            className="sr-only"
-                            htmlFor={`notes-${offer.id}`}
-                          >
-                            Collection plan
-                          </label>
-
-                          <input
-                            id={`notes-${offer.id}`}
-                            name="notes"
-                            maxLength={300}
-                            placeholder="Collection plan (optional)"
-                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                          />
-
-                          <button
-                            type="submit"
-                            disabled={!verified}
-                            className="mt-2 rounded-lg bg-leaf px-4 py-2 text-sm font-bold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            type="submit"
-                            disabled={!verified}
-                            className="mt-2 rounded-lg bg-leaf px-4 py-2 text-sm font-bold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            Reject
-                          </button>
-                        </form>
+                        alreadyRequested && (
+                          <p className="mt-3 text-sm font-semibold text-emerald-700">
+                            You have already requested this donation.
+                          </p>
+                        )
                       )}
                     </article>
                   );
