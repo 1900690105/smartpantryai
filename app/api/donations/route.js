@@ -12,16 +12,19 @@ export async function POST(request) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { error: "Please log in first." },
+        { success: false, error: "Please log in first." },
         { status: 401 },
       );
     }
 
     const { inventoryId } = await request.json();
 
-    if (!inventoryId || typeof inventoryId !== "string") {
+    if (
+      typeof inventoryId !== "string" ||
+      !/^[0-9a-f-]{36}$/i.test(inventoryId)
+    ) {
       return NextResponse.json(
-        { error: "Invalid inventory item." },
+        { success: false, error: "Invalid inventory item." },
         { status: 400 },
       );
     }
@@ -31,88 +34,60 @@ export async function POST(request) {
     });
 
     if (error) {
+      console.error("Donation RPC error:", error);
       return NextResponse.json(
-        { error: error.message || "Could not process donation." },
+        { success: false, error: error.message },
         { status: 400 },
       );
     }
 
-    return NextResponse.json(data);
+    // Handle either an object or an array response.
+    const result = Array.isArray(data) ? data[0] : data;
+
+    if (result?.success === true) {
+      return NextResponse.json(result);
+    }
+
+    // If the function returned no result, verify whether it actually
+    // changed the inventory record before deciding whether it succeeded.
+    const { data: inventory, error: inventoryError } = await supabase
+      .from("inventory_batches")
+      .select("id, donation_status")
+      .eq("id", inventoryId)
+      .maybeSingle();
+
+    if (inventoryError) {
+      console.error("Inventory verification failed:", inventoryError);
+      return NextResponse.json(
+        { success: false, error: "Could not verify donation status." },
+        { status: 500 },
+      );
+    }
+
+    if (inventory?.donation_status === "available") {
+      return NextResponse.json({
+        success: true,
+        message: "Donation is already listed.",
+        inventoryId,
+      });
+    }
+
+    console.error("Unexpected donation RPC response:", data);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          "The donation function returned no result and the inventory is not marked as available. Check the database function.",
+      },
+      { status: 500 },
+    );
   } catch (error) {
     console.error("Donation API error:", error);
 
     return NextResponse.json(
-      { error: "Something went wrong." },
+      { success: false, error: "Something went wrong." },
       { status: 500 },
     );
   }
 }
-
-// import { NextResponse } from "next/server";
-// import { createClient } from "@/lib/supabase/server";
-
-// export async function POST(request) {
-//   try {
-//     const supabase = await createClient();
-
-//     const {
-//       data: { user },
-//       error: authError,
-//     } = await supabase.auth.getUser();
-
-//     if (authError || !user) {
-//       return NextResponse.json(
-//         { error: "Please log in to offer food for donation." },
-//         { status: 401 },
-//       );
-//     }
-
-//     const { inventoryId } = await request.json();
-
-//     if (!inventoryId || typeof inventoryId !== "string") {
-//       return NextResponse.json(
-//         { error: "A valid inventory item is required." },
-//         { status: 400 },
-//       );
-//     }
-
-//     const { data, error } = await supabase
-//       .from("inventory_batches")
-//       .update({ donation_status: "available" })
-//       .eq("id", inventoryId)
-//       .eq("user_id", user.id)
-//       .eq("donation_status", "not_donated")
-//       .gt("quantity", 0)
-//       .select("id, product_name, quantity, unit, donation_status")
-//       .maybeSingle();
-
-//     if (error) {
-//       console.error("Donation update failed:", error);
-//       return NextResponse.json(
-//         { error: "Could not update the donation status." },
-//         { status: 500 },
-//       );
-//     }
-
-//     if (!data) {
-//       return NextResponse.json(
-//         {
-//           error:
-//             "Item not found, already offered for donation, or no longer available.",
-//         },
-//         { status: 409 },
-//       );
-//     }
-
-//     return NextResponse.json({
-//       message: "Item is now available for donation.",
-//       item: data,
-//     });
-//   } catch (error) {
-//     console.error("Donation API error:", error);
-//     return NextResponse.json(
-//       { error: "Something went wrong while offering this item." },
-//       { status: 500 },
-//     );
-//   }
-// }
