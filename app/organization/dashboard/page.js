@@ -8,8 +8,9 @@ import {
 
 import { requireRole } from "@/lib/auth/roles";
 import LogoutButton from "@/components/logout-button";
-import { requestDonation } from "@/app/organization/actions";
+
 import { formatDate } from "@/lib/utils";
+import { approveDonationRequest } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -211,7 +212,7 @@ export default async function OrganizationDashboard() {
                           You have already requested this donation.
                         </p>
                       ) : (
-                        <form action={requestDonation} className="mt-3">
+                        <form action={approveDonationRequest} className="mt-3">
                           <input
                             type="hidden"
                             name="offer_id"
@@ -238,7 +239,14 @@ export default async function OrganizationDashboard() {
                             disabled={!verified}
                             className="mt-2 rounded-lg bg-leaf px-4 py-2 text-sm font-bold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            Request donation
+                            Approve
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={!verified}
+                            className="mt-2 rounded-lg bg-leaf px-4 py-2 text-sm font-bold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            Reject
                           </button>
                         </form>
                       )}
