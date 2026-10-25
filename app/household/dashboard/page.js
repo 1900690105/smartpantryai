@@ -30,6 +30,8 @@ const Card = ({ title, icon: Icon, children }) => (
   </section>
 );
 
+//solve
+
 export default async function HouseholdDashboard() {
   const { supabase, user, profile } = await requireRole(["household"]);
   const [batchesRes, eventsRes, creditsRes] = await Promise.all([
