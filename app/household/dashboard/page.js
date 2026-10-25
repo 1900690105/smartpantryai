@@ -74,6 +74,9 @@ export default async function HouseholdDashboard() {
             SmartPantry <span className="text-leaf">AI</span>
           </Link>
           <div className="flex items-center gap-3">
+            <Link href={"/chatbot"} className="text-blue-500">
+              Chatbot
+            </Link>
             <span className="hidden text-sm text-slate-500 sm:inline">
               Household workspace · {name}
             </span>
